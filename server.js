@@ -144,7 +144,16 @@ function parseExcel(fileBuffer) {
  */
 async function generateClientExcel(group, staffName) {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('落版確認書');
+  const worksheet = workbook.addWorksheet('落版確認書', {
+    pageSetup: {
+      paperSize: 9,              // A4
+      orientation: 'landscape',  // 横向き
+      fitToPage: true,           // ページに合わせる
+      fitToWidth: 1,             // 横幅を1ページに収める
+      fitToHeight: 0             // 縦は自動
+    }
+  });
+
   worksheet.views = [{ showGridLines: true }];
 
   worksheet.columns = [
