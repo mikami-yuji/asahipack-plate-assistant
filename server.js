@@ -350,6 +350,23 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // フォルダ選択APIルート
+  if (req.url === '/api/select-directory' && req.method === 'POST') {
+    const psCommand = `powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Add-Type -AssemblyName System.Windows.Forms; $dialog = New-Object System.Windows.Forms.FolderBrowserDialog; $dialog.Description = 'フォルダを選択してください'; $dialog.ShowNewFolderButton = $true; if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $dialog.SelectedPath }"`;
+
+    exec(psCommand, (err, stdout, stderr) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+        return;
+      }
+      const selectedPath = stdout.trim();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, selectedPath }));
+    });
+    return;
+  }
+
   // APIルート
   if (req.url === '/api/process' && req.method === 'POST') {
     let bodyData = '';

@@ -178,6 +178,27 @@ export default function Home(): React.JSX.Element {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
+  // フォルダ選択ダイアログを開く
+  const handleSelectDirectory = async (target: 'imageSrcDir' | 'outputDestDir'): Promise<void> => {
+    try {
+      const response = await fetch('/api/select-directory', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.selectedPath) {
+          if (target === 'imageSrcDir') {
+            setImageSrcDir(result.selectedPath);
+          } else {
+            setOutputDestDir(result.selectedPath);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('フォルダ選択エラー:', err);
+    }
+  };
+
   // route.ts からのレスポンスに clientGroups も追加されたと仮定して、
   // 解析処理で取得できた得意先一覧を状態として管理する。
   // route.ts 側のレスポンスに `clientGroups` フィールドを含めるよう後で修正する。
@@ -270,27 +291,47 @@ export default function Home(): React.JSX.Element {
             
             <div className="form-group">
               <label className="form-label">共有画像フォルダの場所 (画像取得元)</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={imageSrcDir}
-                onChange={(e) => setImageSrcDir(e.target.value)}
-                placeholder="\\\\asahipack01\\画像"
-                disabled={isProcessing}
-              />
+              <div className="input-group">
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={imageSrcDir}
+                  onChange={(e) => setImageSrcDir(e.target.value)}
+                  placeholder="\\\\asahipack01\\画像"
+                  disabled={isProcessing}
+                />
+                <button
+                  type="button"
+                  className="btn-browse"
+                  onClick={() => handleSelectDirectory('imageSrcDir')}
+                  disabled={isProcessing}
+                >
+                  選択...
+                </button>
+              </div>
               <p className="form-input-help">※受注No.と一致する画像ファイルをスキャンするディレクトリです</p>
             </div>
 
             <div className="form-group">
               <label className="form-label">出力先フォルダの場所</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={outputDestDir}
-                onChange={(e) => setOutputDestDir(e.target.value)}
-                placeholder="空欄の場合はデスクトップに新規作成します"
-                disabled={isProcessing}
-              />
+              <div className="input-group">
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={outputDestDir}
+                  onChange={(e) => setOutputDestDir(e.target.value)}
+                  placeholder="空欄の場合はデスクトップに新規作成します"
+                  disabled={isProcessing}
+                />
+                <button
+                  type="button"
+                  className="btn-browse"
+                  onClick={() => handleSelectDirectory('outputDestDir')}
+                  disabled={isProcessing}
+                >
+                  選択...
+                </button>
+              </div>
               <p className="form-input-help">※得意先ごとの確認用Excelおよび仕分け画像を保存する先です</p>
             </div>
           </section>
