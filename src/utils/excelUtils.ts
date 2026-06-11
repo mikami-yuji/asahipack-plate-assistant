@@ -1,5 +1,6 @@
 import * as xlsx from 'xlsx';
 import ExcelJS from 'exceljs';
+import * as JapaneseHolidays from 'japanese-holidays';
 import { PlateRecord, ClientGroup } from '../types';
 
 /**
@@ -17,6 +18,32 @@ export function parseStaffName(fileBuffer: Buffer): string {
     return val.replace(/^(担当者|担当)[：:]\s*/, '');
   }
   return '担当者';
+}
+
+/**
+ * 指定された年月の最終営業日（土日祝除く）を YYYY/MM/DD 形式で取得する
+ * @param year 年
+ * @param month 月 (1-12)
+ * @returns YYYY/MM/DD 形式の最終営業日
+ */
+export function getLastBusinessDay(year: number, month: number): string {
+  const date = new Date(year, month, 0); // その月の最終日
+  
+  while (true) {
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isHoliday = JapaneseHolidays.isHoliday(date) !== undefined;
+    
+    if (!isWeekend && !isHoliday) {
+      break;
+    }
+    date.setDate(date.getDate() - 1);
+  }
+  
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}/${m}/${d}`;
 }
 
 /**
@@ -253,18 +280,34 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
     const row = worksheet.getRow(currentRow);
     row.height = 20;
 
+    const productType = getProductType(record.supplierName);
+    let displayExpiryDate = record.expiryDate;
+    
+    // SP、シルク印刷、オフセットのみ落版予定日を当月（expiryDateの月）の最終営業日に変更 (土日祝除く)
+    if (['SP', 'シルク印刷', 'オフセット'].includes(productType)) {
+      const match = record.expiryDate.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
+      if (match) {
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10);
+        displayExpiryDate = getLastBusinessDay(year, month);
+      } else {
+        const now = new Date();
+        displayExpiryDate = getLastBusinessDay(now.getFullYear(), now.getMonth() + 1);
+      }
+    }
+
     worksheet.getCell(`A${currentRow}`).value = record.orderNo;
     worksheet.getCell(`B${currentRow}`).value = record.orderSuffix;
     worksheet.getCell(`C${currentRow}`).value = record.orderSub ? Number(record.orderSub) : '';
     worksheet.getCell(`D${currentRow}`).value = record.weight ? Number(record.weight) : '';
     worksheet.getCell(`E${currentRow}`).value = record.finish;
-    worksheet.getCell(`F${currentRow}`).value = getProductType(record.supplierName);
+    worksheet.getCell(`F${currentRow}`).value = productType;
     worksheet.getCell(`G${currentRow}`).value = record.storeName;
     worksheet.getCell(`H${currentRow}`).value = record.brandName;
     worksheet.getCell(`I${currentRow}`).value = record.colorCount ? Number(record.colorCount) : '';
     worksheet.getCell(`J${currentRow}`).value = record.colors;
     worksheet.getCell(`K${currentRow}`).value = record.lastUsedDate;
-    worksheet.getCell(`L${currentRow}`).value = record.expiryDate;
+    worksheet.getCell(`L${currentRow}`).value = displayExpiryDate;
     worksheet.getCell(`M${currentRow}`).value = ''; // 初期値は空
     worksheet.getCell(`N${currentRow}`).value = ''; // 初期値は空
 

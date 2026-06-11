@@ -1,8 +1,17 @@
 import ExcelJS from 'exceljs';
-import { generateClientExcel, getProductType, parseStaffName } from './excelUtils';
+import { generateClientExcel, getProductType, parseStaffName, getLastBusinessDay } from './excelUtils';
 import { ClientGroup } from '../types';
 
 describe('excelUtils', (): void => {
+  describe('getLastBusinessDay', (): void => {
+    test('should return correct last business day of the month', (): void => {
+      // 2026年6月30日(火) -> 平日なので 2026/06/30
+      expect(getLastBusinessDay(2026, 6)).toBe('2026/06/30');
+
+      // 2026年5月31日(日), 30日(土) -> 金曜日の 2026/05/29
+      expect(getLastBusinessDay(2026, 5)).toBe('2026/05/29');
+    });
+  });
   describe('parseStaffName', (): void => {
     test('should correctly extract staff name from cell B2', async (): Promise<void> => {
       const workbook = new ExcelJS.Workbook();
@@ -63,6 +72,25 @@ describe('excelUtils', (): void => {
             lastUsedDate: '2025/02/14',
             expiryDate: '2026/08/14',
             profit: -34036
+          },
+          {
+            clientCode: '0027099',
+            clientName: '（株）みどりフーズ',
+            supplierCode: '0000705',
+            supplierName: '３Ｆロール印刷',
+            plateNo: '01106750',
+            orderNo: '1106750',
+            orderSuffix: '-',
+            orderSub: '25',
+            weight: 5,
+            finish: 'RA',
+            storeName: 'みどり',
+            brandName: 'お米',
+            colorCount: 1,
+            colors: '墨',
+            lastUsedDate: '2024/06/21',
+            expiryDate: '2026/06/21',
+            profit: 527770
           }
         ]
       };
@@ -101,6 +129,20 @@ describe('excelUtils', (): void => {
 
       const brandCell = worksheet!.getCell('H8');
       expect(brandCell.value).toBe('お米');
+
+      // 1行目は「別注」なので落版予定日は元のまま
+      const expiryCell8 = worksheet!.getCell('L8');
+      expect(expiryCell8.value).toBe('2026/08/14');
+
+      // 2行目の検証 (SPタイプなので落版予定日がシフトされている)
+      const orderNoCell9 = worksheet!.getCell('A9');
+      expect(orderNoCell9.value).toBe('1106750');
+
+      const typeCell9 = worksheet!.getCell('F9');
+      expect(typeCell9.value).toBe('SP');
+
+      const expiryCell9 = worksheet!.getCell('L9');
+      expect(expiryCell9.value).toBe('2026/06/30'); // 2026年6月の最終営業日
 
       // 4. データバリデーションの検証 (M8セル)
       const answerCell = worksheet!.getCell('M8');
