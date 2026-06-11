@@ -3,6 +3,23 @@ import ExcelJS from 'exceljs';
 import { PlateRecord, ClientGroup } from '../types';
 
 /**
+ * Excelファイルから担当者名 (B2セル) を取得する
+ * @param fileBuffer Excelファイルのバイナリデータ
+ * @returns 担当者名 (見つからない場合は '担当者')
+ */
+export function parseStaffName(fileBuffer: Buffer): string {
+  const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const staffCell = worksheet['B2'];
+  if (staffCell && staffCell.v) {
+    const val = String(staffCell.v).trim();
+    return val.replace(/^(担当者|担当)[：:]\s*/, '');
+  }
+  return '担当者';
+}
+
+/**
  * アップロードされたExcelファイルのバイナリデータを解析し、レコードの配列に変換する
  * @param fileBuffer Excelファイルのバイナリデータ
  * @returns 解析されたレコードの配列

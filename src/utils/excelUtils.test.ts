@@ -1,8 +1,30 @@
 import ExcelJS from 'exceljs';
-import { generateClientExcel, getProductType } from './excelUtils';
+import { generateClientExcel, getProductType, parseStaffName } from './excelUtils';
 import { ClientGroup } from '../types';
 
 describe('excelUtils', (): void => {
+  describe('parseStaffName', (): void => {
+    test('should correctly extract staff name from cell B2', async (): Promise<void> => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sheet1');
+      worksheet.getCell('B2').value = '担当者：佐藤';
+      
+      const buffer = await workbook.xlsx.writeBuffer();
+      const staffName = parseStaffName(Buffer.from(buffer));
+      
+      expect(staffName).toBe('佐藤');
+    });
+
+    test('should return default value if B2 is empty', async (): Promise<void> => {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sheet1');
+      
+      const buffer = await workbook.xlsx.writeBuffer();
+      const staffName = parseStaffName(Buffer.from(buffer));
+      
+      expect(staffName).toBe('担当者');
+    });
+  });
   describe('getProductType', (): void => {
     test('should correctly classify supplier names into product types', (): void => {
       expect(getProductType('シルク印刷')).toBe('シルク印刷');

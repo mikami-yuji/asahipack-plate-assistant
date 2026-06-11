@@ -30,6 +30,7 @@ export default function Home(): React.JSX.Element {
   const [clientGroups, setClientGroups] = useState<ClientGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ClientGroup | null>(null);
   const [outputDir, setOutputDir] = useState<string>('');
+  const [staffName, setStaffName] = useState<string>('担当者');
   
   // コピー状態管理
   const [subjectCopied, setSubjectCopied] = useState<boolean>(false);
@@ -127,6 +128,9 @@ export default function Home(): React.JSX.Element {
       if (response.ok && result.success) {
         setLogs(result.logs);
         setOutputDir(result.outputDir);
+        if (result.staffName) {
+          setStaffName(result.staffName);
+        }
         
         // パースしたレコードから、もう一度クライアント側でグループ化を再現してUI表示用にする
         // APIから返されたログからパース情報を推測するか、
@@ -213,6 +217,9 @@ export default function Home(): React.JSX.Element {
       
       if (response.ok && result.success) {
         setOutputDir(result.outputDir);
+        if (result.staffName) {
+          setStaffName(result.staffName);
+        }
         // API側で仕分けされたグループデータをroute.tsから受け取る
         // (API route.ts にて groups も返却するように更新する)
         if (result.clientGroups) {
@@ -422,7 +429,7 @@ export default function Home(): React.JSX.Element {
 
                   {/* メールドラフト表示 */}
                   {selectedGroup && (() => {
-                    const draft = generateEmailDraft(selectedGroup, '見上');
+                    const draft = generateEmailDraft(selectedGroup, staffName);
                     return (
                       <div className="draft-container">
                         <div>

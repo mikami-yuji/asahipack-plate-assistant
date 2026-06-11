@@ -1,13 +1,12 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { parseExcel, generateClientExcel, getProductType } from './src/utils/excelUtils';
+import { parseExcel, generateClientExcel, getProductType, parseStaffName } from './src/utils/excelUtils';
 import { PlateRecord, ClientGroup } from './src/types';
 
 // 入力データおよび設定
 const EXCEL_FILE_PATH = 'C:\\Users\\asahi\\Desktop\\フォーマット_JI020L_落版候補リスト_054_見上_20260531232354069134.xlsx';
 const IMAGE_SRC_DIR = '\\\\asahipack01\\画像';
 const OUTPUT_DEST_DIR = 'C:\\Users\\asahi\\Desktop\\テスト_種別追加';
-const STAFF_NAME = '見上';
 
 /**
  * 画像フォルダから受注Noにマッチする画像をスキャンする
@@ -42,7 +41,8 @@ async function runTest(): Promise<void> {
     // 1. 入力Excelの読み込み
     const excelBuffer = await fs.readFile(EXCEL_FILE_PATH);
     const records = await parseExcel(excelBuffer);
-    console.log(`Excelパース完了。総レコード数: ${records.length}件`);
+    const staffName = parseStaffName(excelBuffer);
+    console.log(`Excelパース完了。担当者: ${staffName}様, 総レコード数: ${records.length}件`);
 
     if (records.length === 0) {
       console.log('レコードが見つかりませんでした。');
@@ -89,7 +89,7 @@ async function runTest(): Promise<void> {
       await fs.mkdir(clientFolder, { recursive: true });
 
       // 得意先用Excelの生成・保存
-      const clientExcelBuffer = await generateClientExcel(group, STAFF_NAME);
+      const clientExcelBuffer = await generateClientExcel(group, staffName);
       const excelPath = path.join(clientFolder, `落版確認書_${safeClientName}.xlsx`);
       await fs.writeFile(excelPath, clientExcelBuffer);
       

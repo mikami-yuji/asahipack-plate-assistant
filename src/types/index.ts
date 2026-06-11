@@ -51,4 +51,5 @@ export type ProcessResponseData = {
   outputDir: string;
   logs: ProcessingLogItem[];
   clientGroups?: ClientGroup[];
+  staffName?: string;
 };

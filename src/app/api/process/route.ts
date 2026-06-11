@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { parseExcel, generateClientExcel } from '../../../utils/excelUtils';
+import { parseExcel, generateClientExcel, parseStaffName } from '../../../utils/excelUtils';
 import { ProcessRequestData, ProcessResponseData, ClientGroup, PlateRecord, ProcessingLogItem } from '../../../types';
 
 /**
@@ -98,9 +98,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ProcessRe
       });
     }
 
-    // 担当者の抽出 (元Excelから担当者名を特定するか、デフォルト名)
-    // 今回はリストの元データが「見上」さんなので、デフォルトは「見上」とする
-    const staffName = '見上'; 
+    // 担当者の抽出 (元ExcelのB2セルから動的に取得)
+    const staffName = parseStaffName(buffer);
+    addLog('info', `担当者を特定しました: ${staffName}様`);
 
     // 得意先ごとにグループ化
     const groupsMap = new Map<string, PlateRecord[]>();
@@ -215,7 +215,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ProcessRe
       totalImagesCopied,
       outputDir: rootOutputDir,
       logs,
-      clientGroups // クライアント一覧とレコード情報を返す
+      clientGroups, // クライアント一覧とレコード情報を返す
+      staffName // 特定された担当者名を返す
     });
 
   } catch (globalErr) {
