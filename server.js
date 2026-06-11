@@ -503,6 +503,22 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// サーバーエラーハンドリング（ポート衝突など）
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n【エラー】ポート ${PORT} がすでに使用されています。`);
+    console.error(`・すでにこのツールが起動している可能性があります。別のウィンドウで起動中ではないかご確認ください。`);
+    console.error(`・または、他のアプリケーションがポート ${PORT} を使用しています。\n`);
+  } else {
+    console.error(`\n【サーバーエラー】起動中にエラーが発生しました: ${err.message}\n`);
+  }
+  console.log('エンターキーを押すと終了します...');
+  process.stdin.resume();
+  process.stdin.on('data', () => {
+    process.exit(1);
+  });
+});
+
 // サーバー起動
 server.listen(PORT, () => {
   console.log(`====================================================`);
