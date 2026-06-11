@@ -6,7 +6,7 @@ import { PlateRecord, ClientGroup } from './src/types';
 // 入力データおよび設定
 const EXCEL_FILE_PATH = 'C:\\Users\\asahi\\Desktop\\フォーマット_JI020L_落版候補リスト_054_見上_20260531232354069134.xlsx';
 const IMAGE_SRC_DIR = '\\\\asahipack01\\画像';
-const OUTPUT_DEST_DIR = 'C:\\Users\\asahi\\Desktop\\テスト_種別追加';
+const OUTPUT_DEST_DIR = 'C:\\Users\\asahi\\Desktop\\テスト';
 
 /**
  * 画像フォルダから受注Noにマッチする画像をスキャンする
