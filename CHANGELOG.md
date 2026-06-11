@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [1.1.0] - 2026-06-11
+
+### Added
+- `pkg` を用いたWindows用スタンドアロン実行可能ファイル (`asahipack-plate-assistant.exe`) のビルド構成を追加
+  - Node.jsやその他ランタイムが未インストールのPCでも、ダブルクリックするだけでローカルサーバーが起動しブラウザから利用可能
+  - 静的エクスポートファイル (`out/`) をすべてEXE内部に内包
+- `japanese-holidays` パッケージの TypeScript 型定義ファイルを追加 (`src/types/japanese-holidays.d.ts`)
+
+### Changed
+- `package.json` の `japanese-holidays` バージョン指定エラーを修正 (`^1.1.2` から存在する最新バージョン `^1.0.10` へ変更)
+- `README.md` にスタンドアロンEXEの起動方法およびビルド手順を追加
+
 ## [1.0.0] - 2026-06-11
 
 ### Added
