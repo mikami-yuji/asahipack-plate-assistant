@@ -1,8 +1,27 @@
 import ExcelJS from 'exceljs';
-import { generateClientExcel, getProductType, parseStaffName, getLastBusinessDay } from './excelUtils';
+import { generateClientExcel, getProductType, parseStaffName, getLastBusinessDay, normalizeClientName } from './excelUtils';
 import { ClientGroup } from '../types';
 
 describe('excelUtils', (): void => {
+  describe('normalizeClientName', (): void => {
+    test('should replace various bracket styles of (株) or ㈱ with 株式会社 and remove extra spaces', (): void => {
+      expect(normalizeClientName('(株) みどりフーズ')).toBe('株式会社みどりフーズ');
+      expect(normalizeClientName('（株）南都食糧')).toBe('株式会社南都食糧');
+      expect(normalizeClientName('㈱アサヒパック')).toBe('株式会社アサヒパック');
+      expect(normalizeClientName('  (株)   テスト  ')).toBe('株式会社テスト');
+    });
+
+    test('should replace various bracket styles of (有) or ㈲ with 有限会社', (): void => {
+      expect(normalizeClientName('(有)山田商店')).toBe('有限会社山田商店');
+      expect(normalizeClientName('（有）　鈴木物産')).toBe('有限会社鈴木物産');
+      expect(normalizeClientName('㈲佐藤商会')).toBe('有限会社佐藤商会');
+    });
+
+    test('should handle empty or null string gracefully', (): void => {
+      expect(normalizeClientName('')).toBe('');
+    });
+  });
+
   describe('getLastBusinessDay', (): void => {
     test('should return correct last business day of the month', (): void => {
       // 2026年6月30日(火) -> 平日なので 2026/06/30

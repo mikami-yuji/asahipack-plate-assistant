@@ -47,6 +47,32 @@ export function getLastBusinessDay(year: number, month: number): string {
 }
 
 /**
+ * 得意先名を正規化し、(株)や（株）などの略称を「株式会社」に展開する。有限会社・合同会社も同様。
+ * @param name 元の得意先名
+ * @returns 正規化された得意先名
+ */
+export function normalizeClientName(name: string): string {
+  if (!name) return '';
+  let normalized = name
+    .replace(/\(株\)/g, '株式会社')
+    .replace(/（株）/g, '株式会社')
+    .replace(/㈱/g, '株式会社')
+    .replace(/\(有\)/g, '有限会社')
+    .replace(/（有）/g, '有限会社')
+    .replace(/㈲/g, '有限会社')
+    .replace(/\(合\)/g, '合同会社')
+    .replace(/（合）/g, '合同会社')
+    .replace(/\(同\)/g, '合同会社')
+    .replace(/（同）/g, '合同会社')
+    .replace(/㈏/g, '合同会社');
+  
+  normalized = normalized.replace(/\s*株式会社\s*/g, '株式会社');
+  normalized = normalized.replace(/\s*有限会社\s*/g, '有限会社');
+  normalized = normalized.replace(/\s*合同会社\s*/g, '合同会社');
+  return normalized.trim();
+}
+
+/**
  * アップロードされたExcelファイルのバイナリデータを解析し、レコードの配列に変換する
  * @param fileBuffer Excelファイルのバイナリデータ
  * @returns 解析されたレコードの配列
@@ -67,7 +93,8 @@ export async function parseExcel(fileBuffer: Buffer): Promise<PlateRecord[]> {
     }
 
     const clientCode = String(clientCodeCell.v).trim();
-    const clientName = worksheet[xlsx.utils.encode_cell({ r, c: 1 })]?.v ? String(worksheet[xlsx.utils.encode_cell({ r, c: 1 })].v).trim() : '';
+    const clientNameRaw = worksheet[xlsx.utils.encode_cell({ r, c: 1 })]?.v ? String(worksheet[xlsx.utils.encode_cell({ r, c: 1 })].v).trim() : '';
+    const clientName = normalizeClientName(clientNameRaw);
     const supplierCode = worksheet[xlsx.utils.encode_cell({ r, c: 2 })]?.v ? String(worksheet[xlsx.utils.encode_cell({ r, c: 2 })].v).trim() : '';
     const supplierName = worksheet[xlsx.utils.encode_cell({ r, c: 3 })]?.v ? String(worksheet[xlsx.utils.encode_cell({ r, c: 3 })].v).trim() : '';
     const plateNo = worksheet[xlsx.utils.encode_cell({ r, c: 4 })]?.v ? String(worksheet[xlsx.utils.encode_cell({ r, c: 4 })].v).trim() : '';
