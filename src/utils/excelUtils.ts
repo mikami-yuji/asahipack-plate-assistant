@@ -187,7 +187,7 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
   // グリッド線を表示する
   worksheet.views = [{ showGridLines: true }];
 
-  // 列幅の設定 (A〜N列)
+  // 列幅の設定 (A〜M列)
   worksheet.columns = [
     { key: 'orderNo', width: 12 },      // A: 受注No
     { key: 'orderSuffix', width: 4 },   // B: 枝番1 (-)
@@ -201,8 +201,7 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
     { key: 'colors', width: 25 },       // J: 色
     { key: 'lastUsedDate', width: 14 }, // K: 最終使用日
     { key: 'expiryDate', width: 14 },   // L: 落版予定日
-    { key: 'answer', width: 12 },       // M: 回答 (廃棄/継続)
-    { key: 'reason', width: 30 }        // N: 継続理由
+    { key: 'answer', width: 12 }        // M: 回答 (廃棄/継続)
   ];
 
   // 宛名と作成情報の記述
@@ -220,7 +219,7 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
   worksheet.getCell('K3').font = { name: 'MS Gothic', size: 10 };
 
   // タイトル
-  worksheet.mergeCells('A4:N4');
+  worksheet.mergeCells('A4:M4');
   const titleCell = worksheet.getCell('A4');
   titleCell.value = '落版候補リストのご確認について';
   titleCell.font = { name: 'MS Gothic', size: 16, bold: true, underline: true };
@@ -228,7 +227,7 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
   worksheet.getRow(4).height = 30;
 
   // 説明文
-  worksheet.mergeCells('A5:N5');
+  worksheet.mergeCells('A5:M5');
   const descCell = worksheet.getCell('A5');
   descCell.value = 'いつも大変お世話になっております。弊社で保管しております御社の版につきまして、最終使用日より期間が経過したものを落版（廃棄）候補としてリストアップいたしました。お手数ですが、落版の可否（廃棄/継続）をご記入の上、ご返送いただけますようお願い申し上げます。';
   descCell.font = { name: 'MS Gothic', size: 10 };
@@ -255,15 +254,12 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
   worksheet.getCell(`K${headerRowNumber}`).value = '最終使用日';
   worksheet.getCell(`L${headerRowNumber}`).value = '落版予定日';
   
-  // 回答・理由欄 (背景色を薄い黄色にして目立たせる)
+  // 回答欄 (背景色を薄い黄色にして目立たせる)
   const answerHeaderCell = worksheet.getCell(`M${headerRowNumber}`);
   answerHeaderCell.value = '回答（必須）';
-  
-  const reasonHeaderCell = worksheet.getCell(`N${headerRowNumber}`);
-  reasonHeaderCell.value = '継続の場合の理由';
 
   // ヘッダーのスタイル適用
-  const headerCols = ['A', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+  const headerCols = ['A', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
   headerCols.forEach((col) => {
     const cell = worksheet.getCell(`${col}${headerRowNumber}`);
     cell.font = { name: 'MS Gothic', size: 10, bold: true };
@@ -275,8 +271,8 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
       right: { style: 'thin' }
     };
     
-    // M, N列は回答エリアとして薄い黄色にする
-    if (col === 'M' || col === 'N') {
+    // M列は回答エリアとして薄い黄色にする
+    if (col === 'M') {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -344,10 +340,9 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
     worksheet.getCell(`K${currentRow}`).value = record.lastUsedDate;
     worksheet.getCell(`L${currentRow}`).value = displayExpiryDate;
     worksheet.getCell(`M${currentRow}`).value = ''; // 初期値は空
-    worksheet.getCell(`N${currentRow}`).value = ''; // 初期値は空
 
     // データセルのアライメントと罫線
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
     cols.forEach((col) => {
       const cell = worksheet.getCell(`${col}${currentRow}`);
       cell.font = { name: 'MS Gothic', size: 10 };
@@ -380,15 +375,6 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
           showErrorMessage: true,
           errorTitle: '入力エラー',
           error: 'リストから「廃棄」または「継続」を選択してください。'
-        };
-      }
-      
-      // 理由セル (N列) も薄い黄色にする
-      if (col === 'N') {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFFFFDF0' }
         };
       }
     });

@@ -188,7 +188,7 @@ async function generateClientExcel(group, staffName) {
     { key: 'weight', width: 8 }, { key: 'finish', width: 8 }, { key: 'productType', width: 12 },
     { key: 'storeName', width: 15 }, { key: 'brandName', width: 25 }, { key: 'colorCount', width: 8 },
     { key: 'colors', width: 25 }, { key: 'lastUsedDate', width: 14 }, { key: 'expiryDate', width: 14 },
-    { key: 'answer', width: 12 }, { key: 'reason', width: 30 }
+    { key: 'answer', width: 12 }
   ];
 
   const today = new Date();
@@ -204,14 +204,14 @@ async function generateClientExcel(group, staffName) {
   worksheet.getCell('K3').value = `担当者: ${staffName}`;
   worksheet.getCell('K3').font = { name: 'MS Gothic', size: 10 };
 
-  worksheet.mergeCells('A4:N4');
+  worksheet.mergeCells('A4:M4');
   const titleCell = worksheet.getCell('A4');
   titleCell.value = '落版候補リストのご確認について';
   titleCell.font = { name: 'MS Gothic', size: 16, bold: true, underline: true };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
   worksheet.getRow(4).height = 30;
 
-  worksheet.mergeCells('A5:N5');
+  worksheet.mergeCells('A5:M5');
   const descCell = worksheet.getCell('A5');
   descCell.value = 'いつも大変お世話になっております。弊社で保管しております御社の版につきまして、最終使用日より期間が経過したものを落版（廃棄）候補としてリストアップいたしました。お手数ですが、落版の可否（廃棄/継続）をご記入の上、ご返送いただけますようお願い申し上げます。';
   descCell.font = { name: 'MS Gothic', size: 10 };
@@ -236,10 +236,8 @@ async function generateClientExcel(group, staffName) {
   
   const answerHeaderCell = worksheet.getCell(`M${headerRowNumber}`);
   answerHeaderCell.value = '回答（必須）';
-  const reasonHeaderCell = worksheet.getCell(`N${headerRowNumber}`);
-  reasonHeaderCell.value = '継続の場合の理由';
 
-  const headerCols = ['A', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+  const headerCols = ['A', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
   headerCols.forEach((col) => {
     const cell = worksheet.getCell(`${col}${headerRowNumber}`);
     cell.font = { name: 'MS Gothic', size: 10, bold: true };
@@ -248,7 +246,7 @@ async function generateClientExcel(group, staffName) {
       top: { style: 'medium' }, left: { style: 'thin' }, bottom: { style: 'medium' }, right: { style: 'thin' }
     };
     
-    if (col === 'M' || col === 'N') {
+    if (col === 'M') {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF0D0' } };
     } else {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F2FF' } };
@@ -298,9 +296,8 @@ async function generateClientExcel(group, staffName) {
     worksheet.getCell(`K${currentRow}`).value = record.lastUsedDate;
     worksheet.getCell(`L${currentRow}`).value = displayExpiryDate;
     worksheet.getCell(`M${currentRow}`).value = '';
-    worksheet.getCell(`N${currentRow}`).value = '';
 
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
     cols.forEach((col) => {
       const cell = worksheet.getCell(`${col}${currentRow}`);
       cell.font = { name: 'MS Gothic', size: 10 };
@@ -324,10 +321,6 @@ async function generateClientExcel(group, staffName) {
           errorTitle: '入力エラー',
           error: 'リストから「廃棄」または「継続」を選択してください。'
         };
-      }
-      
-      if (col === 'N') {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFDF0' } };
       }
     });
 
