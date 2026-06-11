@@ -352,7 +352,7 @@ const server = http.createServer(async (req, res) => {
 
   // フォルダ選択APIルート
   if (req.url === '/api/select-directory' && req.method === 'POST') {
-    const psCommand = `powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Add-Type -AssemblyName System.Windows.Forms; $dialog = New-Object System.Windows.Forms.FolderBrowserDialog; $dialog.Description = 'フォルダを選択してください'; $dialog.ShowNewFolderButton = $true; if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $dialog.SelectedPath }"`;
+    const psCommand = `powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -sta -Command "Add-Type -AssemblyName System.Windows.Forms; $dialog = New-Object System.Windows.Forms.FolderBrowserDialog; $dialog.Description = 'フォルダを選択してください'; $dialog.ShowNewFolderButton = $true; if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $dialog.SelectedPath }"`;
 
     exec(psCommand, (err, stdout, stderr) => {
       if (err) {
