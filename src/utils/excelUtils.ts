@@ -133,6 +133,8 @@ export async function generateClientExcel(group: ClientGroup, staffName: string)
   worksheet.getCell('A1').value = `${group.clientName} 御中`;
   worksheet.getCell('A1').font = { name: 'MS Gothic', size: 14, bold: true };
 
+  worksheet.getCell('K1').value = '株式会社アサヒパック';
+  worksheet.getCell('K1').font = { name: 'MS Gothic', size: 10, bold: true };
   worksheet.getCell('K2').value = `作成日: ${dateString}`;
   worksheet.getCell('K2').font = { name: 'MS Gothic', size: 10 };
   worksheet.getCell('K3').value = `担当者: ${staffName}`;

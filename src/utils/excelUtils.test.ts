@@ -62,6 +62,9 @@ describe('excelUtils', (): void => {
       expect(clientCell.value).toBe('（株）みどりフーズ 御中');
 
       // 2. 担当者の検証
+      const companyCell = worksheet!.getCell('K1');
+      expect(companyCell.value).toBe('株式会社アサヒパック');
+
       const staffCell = worksheet!.getCell('K3');
       expect(staffCell.value).toBe('担当者: 見上');
 
